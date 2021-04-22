@@ -1,0 +1,10 @@
+{
+  "exchanges": [
+    {
+      "coin": "WAZIRX/WRX",
+      "exchange": "wrxinr",
+      "high": 140,
+      "low": 131
+    }
+  ]
+}
