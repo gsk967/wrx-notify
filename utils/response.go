@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"fmt"
+	"log"
 	"strconv"
 )
 
@@ -18,7 +18,7 @@ type ExchangeResponse struct {
 }
 
 func (tickerExchangeResponse ExchangeResponse) PrintLastValue(exchange string) {
-	fmt.Printf("Exchange %s At %s , Last exchange value in inr : %s \n ", exchange,
+	log.Printf("Exchange %s At %s , Last exchange value : %s", exchange,
 		GetTimeStamp(tickerExchangeResponse.At), tickerExchangeResponse.Ticker.Last)
 }
 

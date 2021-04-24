@@ -14,6 +14,7 @@ const (
 	FlagTimeInterval     = "watch"
 	FlagTelegramNotify   = "tg-notify"
 	FlagTelegramBotToken = "tg-token"
+	FlagTelegramChatId   = "tg-chat-id"
 )
 
 func main() {
@@ -33,10 +34,18 @@ func main() {
 				if len(tgBotToken) == 0 || tgBotToken == "" {
 					return errors.New("telegram bot token is required, --tg-token  110201543:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw")
 				}
+				tgChatId, err := cmd.Flags().GetInt64(FlagTelegramChatId)
+				if err != nil {
+					return err
+				}
+				if tgChatId == 0 {
+					return errors.New("telegram chat id is required, --tg-chat-id  110201543")
+				}
 			}
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
+			var tgAlert *utils.TelegramAlert
 			filePath, err := cmd.Flags().GetString(FlagExchangesList)
 			if err != nil {
 				return err
@@ -45,7 +54,23 @@ func main() {
 			if err != nil {
 				return err
 			}
-			utils.StartWatchingExchanges(filePath, time.Duration(flagTimeInterval))
+			tgNotify, err := cmd.Flags().GetBool(FlagTelegramNotify)
+			if err != nil {
+				return err
+			}
+			if tgNotify {
+				tgBotToken, err := cmd.Flags().GetString(FlagTelegramBotToken)
+				if err != nil {
+					return err
+				}
+				tgChatId, err := cmd.Flags().GetInt64(FlagTelegramChatId)
+				if err != nil {
+					return err
+				}
+				tgAlert = utils.NewTelegramAlerter(tgBotToken, tgChatId)
+			}
+
+			utils.StartWatchingExchanges(filePath, time.Duration(flagTimeInterval), tgAlert)
 			return nil
 		},
 	}
@@ -55,6 +80,8 @@ func main() {
 	rootCmd.Flags().String(FlagExchangesList, "", "Json file for exchanges list : --exchanges-list exchanges.json")
 	rootCmd.Flags().Bool(FlagTelegramNotify, false, "Telegram bot notifications : true/false")
 	rootCmd.Flags().String(FlagTelegramBotToken, "", "Telegram bot authorization token : --tg-token 110201543:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw")
+	rootCmd.Flags().Int64(FlagTelegramChatId, 0, "Telegram chat id  : --tg-chat-id 110201543")
+
 	err := rootCmd.MarkFlagRequired(FlagExchangesList)
 	if err != nil {
 		panic(err)
